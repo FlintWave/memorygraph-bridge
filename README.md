@@ -40,6 +40,34 @@ Every memory carries structured `context` metadata (source, project path, tool n
 
 After compaction, the agent (or a future session) can use `recall_memories` or `search_memories` to reload what it needs. MemoryGraph's `project_path` filter scopes recall to the current project.
 
+## What the hook does, and what it sends
+
+The plugin ships one hooks module, `hooks/memorygraph-bridge.ts`, which hooks
+the `session.compact` event. It first lets compaction run normally (including
+any other compaction plugin), then reads the messages being compacted and
+works out up to `maxMemories` memories from them.
+
+It calls these tools by itself, without the model asking, once per compaction:
+
+| Tool | Server | When |
+| --- | --- | --- |
+| `store_memory` | the MCP server named by `mcpServer` (default `memorygraph`) | Once per extracted memory, up to `maxMemories` |
+| `create_relationship` | the same server | Once per link between two memories it just stored |
+
+What it sends: memory titles, short summaries, and excerpts from the
+conversation (the session goal, decisions, errors and their fixes, and the
+paths of files that were touched), plus tags, an importance score and the
+`projectPath` you configure. Text that looks like a secret (API keys, tokens,
+passwords) is replaced with `[REDACTED]` before it is sent. It sends this only to the MemoryGraph MCP server
+you registered in Claude Code. If that server is local (the default pipx
+install with SQLite), nothing leaves your machine; if you pointed MemoryGraph
+at a remote or cloud backend, the data goes wherever that backend stores it.
+The plugin makes no network calls of its own.
+
+When `nudge` is on and at least one memory was stored, it adds a single line
+to the compacted conversation telling the agent it can use `recall_memories`.
+It does not change or remove any other message.
+
 ## Requirements
 
 You need [MemoryGraph](https://memorygraph.dev) running as an MCP server in Claude Code:
