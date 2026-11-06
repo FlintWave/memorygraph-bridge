@@ -1,6 +1,7 @@
 {
   "name": "memorygraph-bridge",
   "version": "0.2.0",
+  "author": "FlintWave",
   "description": "Extracts context during Claude Code compactions and stores it in MemoryGraph (memorygraph.dev) so agents can recall it across context boundaries.",
   "license": "MIT",
   "userConfig": {
