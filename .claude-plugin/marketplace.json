@@ -1,0 +1,16 @@
+{
+  "name": "memorygraph-bridge",
+  "owner": {
+    "name": "FlintWave",
+    "url": "https://github.com/FlintWave"
+  },
+  "plugins": [
+    {
+      "name": "memorygraph-bridge",
+      "source": "./",
+      "description": "Stores session context in MemoryGraph (memorygraph.dev) during compaction, with typed memories and graph relationships.",
+      "version": "0.2.0",
+      "license": "MIT"
+    }
+  ]
+}
