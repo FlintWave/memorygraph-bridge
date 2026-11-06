@@ -1,0 +1,38 @@
+{
+  "name": "memorygraph-bridge",
+  "version": "0.2.0",
+  "description": "Extracts context during Claude Code compactions and stores it in MemoryGraph (memorygraph.dev) so agents can recall it across context boundaries.",
+  "license": "MIT",
+  "userConfig": {
+    "mcpServer": {
+      "type": "string",
+      "title": "MemoryGraph MCP server name",
+      "description": "The name of the MemoryGraph MCP server as registered in Claude Code (e.g. 'memorygraph').",
+      "default": "memorygraph"
+    },
+    "importance": {
+      "type": "number",
+      "title": "Default memory importance",
+      "description": "Importance score (0.0–1.0) assigned to memories stored during compaction.",
+      "default": 0.7
+    },
+    "maxMemories": {
+      "type": "number",
+      "title": "Maximum memories per compaction",
+      "description": "Cap on the number of memories stored in a single compaction to avoid flooding MemoryGraph.",
+      "default": 5
+    },
+    "nudge": {
+      "type": "boolean",
+      "title": "Post-compaction nudge",
+      "description": "Append a brief note to the post-compaction messages reminding the agent to recall MemoryGraph memories.",
+      "default": true
+    },
+    "projectPath": {
+      "type": "string",
+      "title": "Project path",
+      "description": "Working directory path attached to stored memories as context, enabling project-scoped recall via memorygraph.dev's project_path filter.",
+      "default": ""
+    }
+  }
+}
