@@ -95,16 +95,47 @@ async function createRelationship(
   }
 }
 
+export async function checkServer($: HookContext, server: string): Promise<boolean> {
+  try {
+    await $.mcp.call(server, 'get_recent_activity', { limit: 1 });
+    return true;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const isWrongServer = /unknown tool|not found|no such tool/i.test(msg);
+    if (isWrongServer) {
+      $.ui.log(
+        `memorygraph-bridge: server '${server}' does not support MemoryGraph tools. ` +
+        `Expected tools: store_memory, create_relationship. ` +
+        `Check your mcpServer config in ~/.claude/settings.json — it should point to a MemoryGraph server (default: 'memorygraph').`,
+      );
+    } else {
+      $.ui.log(
+        `memorygraph-bridge: could not reach server '${server}': ${msg}. ` +
+        `Is the MemoryGraph MCP server registered? Run: claude mcp add memorygraph memorygraph`,
+      );
+    }
+    return false;
+  }
+}
+
 const NUDGE_TEXT =
   '[memorygraph-bridge] Context was stored in MemoryGraph before compaction. ' +
   'Use recall_memories to reload relevant context if needed.';
 
 export const register: Register = (on: On, options: PluginOptions) => {
   const config = resolveConfig(options);
+  let serverChecked = false;
+  let serverOk = false;
 
   on('session.compact', async ($, event, next) => {
     const result = await next(event);
     if ('skip' in result && result.skip) return result;
+
+    if (!serverChecked) {
+      serverChecked = true;
+      serverOk = await checkServer($, config.mcpServer);
+    }
+    if (!serverOk) return result;
 
     const messages = event.messages as readonly SessionMessage[];
     if (messages.length < 4) return result;
